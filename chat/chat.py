@@ -4,6 +4,44 @@ from peft import PeftModel
 import ipdb
 
 
+# class chatHistory:
+#     def __init__(self):
+#         self.chat_history = []
+#         self.system_prompt = "A conversation between User and Assistant. The user asks a question, and the Assistant solves it. \
+#  The assistant first thinks about the reasoning process in the mind and then provides the user \
+#  with the answer. The reasoning process and answer are enclosed within <think> </think> and \
+#  <answer> </answer> tags, respectively, i.e., <think> reasoning process here </think> \
+#  <answer> answer here </answer>. "
+#         self.message_structure = [{"content":self.system_prompt,"role":"system"},{"content":"user_input","role":"user"},{}]
+
+    
+#     def get_prompt(self.message_structure):
+#         prompt = ""
+#         for message in self.message_structure:
+#             prompt += message["content"] + "\n"
+#         return prompt
+
+#     def add_user_message(self, message):
+#         return self.message_structure.append({"content":message,"role":"user"})
+    
+#     def add_system_message(self, message):
+#         return self.message_structure.append({"content":message,"role":"system"})
+    
+#     def add_assistant_message(self, message):
+#         return self.message_structure.append({"content":message,"role":"assistant","feedback": None, "location": 1})
+
+#     def save_message_structure(self):
+#         import json
+#         with open("chat_history.json","w") as f:
+#             json.dump(self.message_structure,f)
+#         return self.message_structure   
+
+#     def reinit_chat_history(self):
+        
+#         self.chat_history = [self.system_prompt]
+#         return self.chat_history
+
+
 class ChatBot:
     def __init__(self, model_path, lora_path):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -30,6 +68,7 @@ class ChatBot:
                 attention_mask=attention_mask,
                 do_sample=True,
                 temperature=0.6,
+                pad_token_id=self.tokenizer.eos_token_id,
             )
             output = self.tokenizer.batch_decode(
                 generated_ids, skip_special_tokens=True
@@ -52,9 +91,10 @@ class ChatBot:
  The assistant first thinks about the reasoning process in the mind and then provides the user \
  with the answer. The reasoning process and answer are enclosed within <think> </think> and \
  <answer> </answer> tags, respectively, i.e., <think> reasoning process here </think> \
- <answer> answer here </answer>. "
+ <answer> answer here </answer>."
         chat_history.append(system_prompt)
         while True:
+            print("-" * 30)
             print("Type 'exit' or 'quit' to end the chat.")
             print("-" * 30)
             user_input = input("User: ")
@@ -72,11 +112,10 @@ class ChatBot:
             prompt = "\n".join(chat_history)
             response = self.generate_response(prompt).split("Assistant:")[-1]
             # response_wo_think = response.split("</think>")[-1]
-            response = "Assistant: " + response
+            response = "Assistant: " + "<think>" + response
             chat_history.append(response)
             print("-" * 30)
             print(response)
-
 
 if __name__ == "__main__":
     # Example usage
