@@ -57,6 +57,7 @@ class ChatBot:
             )
 
     def generate_response(self, prompt):
+        print(prompt)
         inputs = self.tokenizer(prompt, return_tensors="pt")
         input_ids = inputs["input_ids"].to(self.device)
         attention_mask = inputs["attention_mask"].to(self.device)
@@ -107,18 +108,19 @@ class ChatBot:
                 chat_history = self.reinit_chat_history(chat_history)
                 print("Chat history reset.")
                 continue
-            user_input = "User: " + user_input + "<think>"
+            user_input = "\n" + "User: " + user_input + "\n" + "Assistant: <think>"
             chat_history.append(user_input)
-            prompt = "\n".join(chat_history)
-            response = self.generate_response(prompt).split("Assistant:")[-1]
+            prompt = "".join(chat_history)
+            response = self.generate_response(prompt)#.split("Assistant:")[-1]
             # response_wo_think = response.split("</think>")[-1]
-            response = "Assistant: " + "<think>" + response
             chat_history.append(response)
             print("-" * 30)
-            print(response)
+            print("Assistant: <think>" + response)
+            print("-" * 30)
+            print((chat_history))
 
 if __name__ == "__main__":
     # Example usage
-    model_path = "/model/DeepSeek-R1-Distill-Qwen-14B"
+    model_path = "/model/DeepSeek-R1-Distill-Qwen-32B"
     chatbot = ChatBot(model_path, None)
     chatbot.chat()
